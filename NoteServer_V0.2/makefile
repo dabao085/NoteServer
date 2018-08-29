@@ -15,8 +15,8 @@ all: noteClient noteServer
 noteClient: noteClient.cpp noteClient.h
         g++ -g -o noteClient noteClient.cpp -L/usr/lib64/mysql -lmysqlclient
 
-noteServer: noteServer.cpp stringUtil.cpp noteServer.h stringUtil.h
-        g++ -g -o noteServer noteServer.cpp stringUtil.cpp  -L/usr/lib64/mysql -lmysqlclient
+noteServer: noteServer.cpp stringUtil.cpp noteServer.h stringUtil.h sqlExecuteResult.h sqlAddExecuteResult.h sqlListExecuteResult.h sqlDeleteExecuteResult.h sqlDoneExecuteResult.h sqlGetExecuteResult.h sqlExecuteResultFactory.h
+        g++ -g -o noteServer noteServer.cpp stringUtil.cpp sqlExecuteResultFactory.cpp -L/usr/lib64/mysql -lmysqlclient
 
 clean:
-        rm *.o
+        rm noteClient noteServer
