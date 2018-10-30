@@ -1,5 +1,5 @@
-/*noteServer V0.2
- *using accept and fork modle, implement a simple server
+/*noteServer V0.3
+ *using epoll to implement a simple noteServer
 */
 
 #include "noteServer.h"
@@ -15,9 +15,10 @@ int getResultFromMysql(const string &request, string &response);
 
 int main(int argc, char *argv[])
 {
-    int listenfd, connfd;
+    int listenfd, connfd, epollfd, nfds, i;
 	socklen_t len;
 	struct sockaddr_in servaddr, cliaddr;
+	struct epoll_event ev, events[20];
 	char buff[1024];
 	time_t ticks;
 	pid_t pid;
@@ -33,6 +34,11 @@ int main(int argc, char *argv[])
 	servaddr.sin_family = AF_INET;
 	servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
 	servaddr.sin_port = htons(6610);
+
+	epollfd = epoll_create1(0);
+	ev.data.fd = listenfd;
+	ev.events = EPOLLIN | EPOLLET;
+	epoll_ctl(epollfd, EPOLL_CTL_ADD, listenfd, &ev);
 
 	if(bind(listenfd, (struct sockaddr*)&servaddr, sizeof(servaddr)) < 0)
     {
@@ -50,30 +56,60 @@ int main(int argc, char *argv[])
 
 	for(;;)
 	{
-		len = sizeof(cliaddr);
-		connfd = accept(listenfd,(struct sockaddr*)&cliaddr,&len);
-        if(connfd < 0)
-        {
-            cerr << "accept error" << endl;
-            return -1;
-        }
-
-        cout << "connection from " << inet_ntop(AF_INET, &cliaddr.sin_addr, buff, sizeof(buff)) << ", port is " << ntohs(cliaddr.sin_port) << endl;
-
-		pid = fork();
-		if(pid < 0)
+		nfds = epoll_wait(epollfd, events, 20, -1);
+		for(i = 0; i < nfds; ++i)
 		{
-            cerr << "fork error" << endl;
-			return -1;
-		}
-		if(pid == 0)//child
-		{
-			close(listenfd);
-			disposeProcess(connfd);
-			return 0;
+			if(events[i].data.fs == listenfd)	//新连接
+			{
+				len = sizeof(cliaddr);
+				connfd = accept(listenfd,(struct sockaddr*)&cliaddr,&len);
+				if(connfd < 0)
+				{
+					cerr << "accept error" << endl;
+					return -1;
+				}
+
+				cout << "connection from " << inet_ntop(AF_INET, &cliaddr.sin_addr, buff, sizeof(buff)) << ", port is " << ntohs(cliaddr.sin_port) << endl;
+
+				ev.events = EPOLLIN | EPOLLOUT | EPOLLET;
+				ev.data.fd = connfd;
+				if(epoll_ctl(epollfd, EPOLL_CTL_ADD, connfd, &ev) < 0)
+				{
+					cerr << "epoll_ctl new connection error: fd = " << connfd << endl;
+					return -1;
+				}
+				close(fd);
+			}
+			else
+			{
+				disposeProcess(events.data.fd);
+			}
 		}
 
-		close(connfd);
+		// len = sizeof(cliaddr);
+		// connfd = accept(listenfd,(struct sockaddr*)&cliaddr,&len);
+        // if(connfd < 0)
+        // {
+        //     cerr << "accept error" << endl;
+        //     return -1;
+        // }
+
+        // cout << "connection from " << inet_ntop(AF_INET, &cliaddr.sin_addr, buff, sizeof(buff)) << ", port is " << ntohs(cliaddr.sin_port) << endl;
+
+		// pid = fork();
+		// if(pid < 0)
+		// {
+        //     cerr << "fork error" << endl;
+		// 	return -1;
+		// }
+		// if(pid == 0)//child
+		// {
+		// 	close(listenfd);
+		// 	disposeProcess(connfd);
+		// 	return 0;
+		// }
+
+		// close(connfd);
 	}
 
 	return 0;

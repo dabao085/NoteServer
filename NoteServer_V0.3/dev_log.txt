@@ -1,0 +1,15 @@
+2018-08-28
+1) How to use variable number of arguments, cause according the variaty of input parameters, we cannot get parameters out of the range of paramters.
+2) How to return more than 1 line of result.
+
+Solution:
+1) Just like this:
+    string cmdMsg;
+    for(int i = 1; i < argc; ++i)
+    {
+        cmdMsg += argv[i];
+        cmdMsg += " ";
+    }
+read all the parameters and the num of those, so we can use the argc to control the circulation.
+
+2) Add an extra "\n" at the end of the result of single line, then client will parse it and print if by each line.
