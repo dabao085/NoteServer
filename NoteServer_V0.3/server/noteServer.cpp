@@ -21,12 +21,7 @@ int main(int argc, char *argv[])
 	char buff[1024];
 	time_t ticks;
 
-	listenfd = socket(AF_INET, SOCK_STREAM, 0);
-	if(listenfd == -1)
-	{
-		cerr << "socket error!" << endl;
-		return -1;
-	}
+	listenfd = Socket(AF_INET, SOCK_STREAM, 0);
 
 	bzero(&servaddr,sizeof(servaddr));
 	servaddr.sin_family = AF_INET;
@@ -41,17 +36,8 @@ int main(int argc, char *argv[])
 	ev.events = EPOLLIN|EPOLLET;
 	epoll_ctl(epollfd, EPOLL_CTL_ADD, listenfd, &ev);
 
-	if(bind(listenfd, (struct sockaddr*)&servaddr, sizeof(servaddr)) < 0)
-    {
-        cerr << "bind error" << endl;
-        return -1;
-    }
-
-	if(listen(listenfd, LISTENQ) < 0)
-    {
-        cerr << "listen error" << endl;
-        return -1;
-    }
+	Bind(listenfd, (struct sockaddr*)&servaddr, sizeof(servaddr));
+	Listen(listenfd, LISTENQ);
 
 	cout << "ready for event-loop" << endl;
 
@@ -63,12 +49,8 @@ int main(int argc, char *argv[])
 			if(events[i].data.fd == listenfd)
 			{
 				len = sizeof(cliaddr);
-				connfd = accept(listenfd,(struct sockaddr*)&cliaddr,&len);
-			    if(connfd < 0)
-			    {
-			        cerr << "accept error" << endl;
-			        return -1;
-			    }
+				connfd = Accept(listenfd, (struct sockaddr*)&cliaddr, &len);
+
 				cout << "connection from " << inet_ntop(AF_INET, &cliaddr.sin_addr, buff, sizeof(buff)) << ", port is " << ntohs(cliaddr.sin_port) << endl;
 				ev.data.fd = connfd;
 				ev.events = EPOLLIN|EPOLLET;
@@ -84,12 +66,7 @@ int main(int argc, char *argv[])
 				int n;
 				int sockfd = events[i].data.fd;
 				if(events[i].events & EPOLLIN){		
-					n = read(sockfd, recvBuf, 1024);
-					if(n < 0)
-					{
-						cerr << "read error" << endl;
-						return -1;
-					}
+					n = Read(sockfd, recvBuf, 1024);
 
 					if(n == 0)
 					{
@@ -113,12 +90,8 @@ int main(int argc, char *argv[])
 				}
 				if(events[i].events & EPOLLOUT)
 				{					
-					n = write(sockfd, response.c_str(), response.length());
-					if(n < 0)
-					{
-						cerr << "write error" << endl;
-						return -1;
-					}
+					Write(sockfd, response.c_str(), response.length());
+
 					response.clear();
 					memset(recvBuf, 0, 1024);
 					ev.data.fd = sockfd;

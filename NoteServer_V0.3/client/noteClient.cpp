@@ -38,31 +38,20 @@ int main(int argc, char *argv[])
         cmdMsg += " ";
     }
 
-	sockfd = socket(AF_INET, SOCK_STREAM, 0);
-	if(sockfd == -1)
-	{
-        cerr << "socket failed" << endl;
-		return -1;
-	}
+	sockfd = Socket(AF_INET, SOCK_STREAM, 0);
 
 	bzero(&servaddr, sizeof(servaddr));
 	servaddr.sin_family = AF_INET;
 	servaddr.sin_port = htons(6610);
 
-	connect(sockfd, (struct sockaddr*)&servaddr, sizeof(servaddr));
+	Connect(sockfd, (struct sockaddr*)&servaddr, sizeof(servaddr));
 
-	n = write(sockfd, cmdMsg.c_str(), cmdMsg.length());
-    if(n < 0)
-    {
-        cerr << "write error" << endl;
-        return -1;
-    }
+	Write(sockfd, cmdMsg.c_str(), cmdMsg.length());   
     
-    char recvBuff[1024];
-    n = read(sockfd, recvBuff, 1024);
+    char recvBuff[MAXLEN];
+    n = Read(sockfd, recvBuff, MAXLEN);
     recvBuff[n] = '\0';
 
-    cout << "recvBuff: "<< endl;
-    cout << recvBuff ;
+    cout << "recvBuff: "<< recvBuff << endl;
 	return 0;  
 }
