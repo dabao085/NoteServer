@@ -13,13 +13,11 @@ int getResultFromMysql(const string &request, string &response);
 
 int main(int argc, char *argv[])
 {
-	char recvBuf[1024],	sendBuf[1024];
+	char recvBuf[1024],	sendBuf[1024], buff[1024];
 	string response;
     int listenfd, connfd;
 	socklen_t len;
 	struct sockaddr_in servaddr, cliaddr;
-	char buff[1024];
-	time_t ticks;
 
 	listenfd = Socket(AF_INET, SOCK_STREAM, 0);
 
@@ -66,8 +64,7 @@ int main(int argc, char *argv[])
 				int n;
 				int sockfd = events[i].data.fd;
 				if(events[i].events & EPOLLIN){		
-					n = Read(sockfd, recvBuf, 1024);
-
+					n = read(sockfd, recvBuf, 1024);
 					if(n == 0)
 					{
 						cout << "disconnect from client" << endl;
@@ -84,16 +81,19 @@ int main(int argc, char *argv[])
 						return -1;		
 					}						
 					
+					if(response.empty()){
+						response = "记录为空";
+					}
 					ev.data.fd = sockfd;
 					ev.events = EPOLLOUT|EPOLLET;
 					epoll_ctl(epollfd, EPOLL_CTL_MOD, sockfd, &ev);
 				}
 				if(events[i].events & EPOLLOUT)
 				{					
-					Write(sockfd, response.c_str(), response.length());
-
+					write(sockfd, response.c_str(), response.length());
 					response.clear();
 					memset(recvBuf, 0, 1024);
+
 					ev.data.fd = sockfd;
 					ev.events = EPOLLIN|EPOLLET;
 					epoll_ctl(epollfd, EPOLL_CTL_MOD, sockfd, &ev);
@@ -110,6 +110,12 @@ int main(int argc, char *argv[])
  *example:add 2018-07-10_09:00 2018-07-10_10:00 reading
  *@inputParam2:reponse is a string which contains query result from mysql.
  *@return value:0 means success, -1 means error
+*/
+
+/*
+ * 连接数据库进行操作
+ * request为请求
+ * response为返回的结果
 */
 int getResultFromMysql(const string &request, string &response)
 {
@@ -132,14 +138,14 @@ int getResultFromMysql(const string &request, string &response)
 		return -1;
 	}
 
-	string result;
+	//string result;
 	CSqlExecuteResult* pSqlExecute = CSqlExecuteResultFactory::create(vectQueryElement[0]);
 	pSqlExecute->assginParameter(vectQueryElement);
-	if(pSqlExecute->executeAndGetResult(result) < 0)
+	if(pSqlExecute->executeAndGetResult(response) < 0)
 	{
 		cerr << "executeAndGetResult error" << endl;
 		return -1;
 	}
-	response = result;
+	//response = result;
 	return 0;
 }

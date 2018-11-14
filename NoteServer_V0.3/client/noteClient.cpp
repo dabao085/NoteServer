@@ -46,10 +46,10 @@ int main(int argc, char *argv[])
 
 	Connect(sockfd, (struct sockaddr*)&servaddr, sizeof(servaddr));
 
-	Write(sockfd, cmdMsg.c_str(), cmdMsg.length());   
+	write(sockfd, cmdMsg.c_str(), cmdMsg.length());   
     
     char recvBuff[MAXLEN];
-    n = Read(sockfd, recvBuff, MAXLEN);
+    n = read(sockfd, recvBuff, MAXLEN);
     recvBuff[n] = '\0';
 
     cout << "recvBuff: "<< recvBuff << endl;

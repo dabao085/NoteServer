@@ -8,11 +8,11 @@ class CSqlAddExecuteResult:public CSqlExecuteResult
 {
 public:
     virtual ~CSqlAddExecuteResult(){}
-    virtual void assginParameter(std::vector<std::string>& vecQueryElement)
+    virtual void assginParameter(const std::vector<std::string>& vecQueryElement)
     {
         if(vecQueryElement.size() != 4)
         {
-            std::cout << "vecQueryElement is not meet the condition!" << std::endl;
+            std::cout << "vecQueryElement does not meet the condition!" << std::endl;
             return ;
         }
 

@@ -13,7 +13,7 @@ public:
     virtual ~CSqlExecuteResult(){}
 
     //赋予SQL所需参数
-    virtual void assginParameter(std::vector<std::string>& vecQueryElement) = 0;
+    virtual void assginParameter(const std::vector<std::string>& vecQueryElement) = 0;
     //查询入口，执行SQL语句并保存执行结果
     virtual int executeAndGetResult(std::string &result) = 0;
 
@@ -39,47 +39,45 @@ protected:
     //获取SQL操作类型
     virtual std::string getOperationType() const = 0;
     //查询并保存结果
-    void getQueryReuslt(std::string &result)
-    {
-        m_res = mysql_store_result(m_mysql);
-		if(m_res == NULL)
-		{
-            std::cout << "mysql_store_result failed" << std::endl;
-			return ;
-		}
+    // void getQueryReuslt(std::string &result)
+    // {
+    //     m_res = mysql_store_result(m_mysql);
+	// 	if(m_res == NULL)
+	// 	{
+    //         std::cout << "mysql_store_result failed" << std::endl;
+	// 		return ;
+	// 	}
 
-		m_row = mysql_fetch_row(m_res);
-		int fieldcount = mysql_num_fields(m_res);
-		int rows = mysql_num_rows(m_res);
-		char buf[32];
-        std::string queryResultBuf;
-		int i, j;
+	// 	m_row = mysql_fetch_row(m_res);
+	// 	int fieldcount = mysql_num_fields(m_res);
+	// 	int rows = mysql_num_rows(m_res);
+	// 	char buf[32];
+    //     std::string queryResultBuf;
+	// 	int i, j;
 
-		for(j = 0; j < rows; ++j)
-		{
-			for(i = 0; i < fieldcount; ++i)
-			{
-				//memset(buf, 0, sizeof(buf));
-				if (m_row[i] != NULL && (strlen(m_row[i]) > 0))
-				{
-					//snprintf(buf, sizeof(buf), "%s", row[i]);
-                    queryResultBuf = m_row[i];
-					result += queryResultBuf + " ";
-					std::cout << queryResultBuf << " ";
-				}
-			}
-            result += "\n";
-			std::cout << std::endl;
-			m_row = mysql_fetch_row(m_res);
-		}
-		std::cout << "result: " << std::endl;
-        std::cout << result;
-    }
+	// 	for(j = 0; j < rows; ++j)
+	// 	{
+	// 		for(i = 0; i < fieldcount; ++i)
+	// 		{
+	// 			//memset(buf, 0, sizeof(buf));
+	// 			if (m_row[i] != NULL && (strlen(m_row[i]) > 0))
+	// 			{
+	// 				//snprintf(buf, sizeof(buf), "%s", row[i]);
+    //                 queryResultBuf = m_row[i];
+	// 				result += queryResultBuf + " ";
+	// 				std::cout << queryResultBuf << " ";
+	// 			}
+	// 		}
+    //         result += "\n";
+	// 		std::cout << std::endl;
+	// 		m_row = mysql_fetch_row(m_res);
+	// 	}
+	// 	std::cout << "result: " << std::endl;
+    //     std::cout << result;
+    // }
 
 protected:
     std::string operationType;
-    MYSQL_RES* m_res;
-	MYSQL_ROW m_row;
 	MYSQL* m_mysql;
 };
 

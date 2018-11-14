@@ -29,7 +29,7 @@ int Socket(int domain, int type, int protocal)
         std::cerr << "Socket error!" << std::endl;
         exit(1);
     }
-    return 0;
+    return sockfd;
 }
 
 int Connect(int sockfd, const struct sockaddr *servaddr, socklen_t addrlen)

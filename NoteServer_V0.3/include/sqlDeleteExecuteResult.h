@@ -1,5 +1,6 @@
 #ifndef _SQL_DELETE_EXECUTE_RESULT_H_
 #define _SQL_DELETE_EXECUTE_RESULT_H_
+#include "sqlExecuteResult.h"
 
 //delete->delete
 class CSqlDeleteExecuteResult:public CSqlExecuteResult
@@ -7,11 +8,11 @@ class CSqlDeleteExecuteResult:public CSqlExecuteResult
 public:
     virtual ~CSqlDeleteExecuteResult(){}
 
-    virtual void assginParameter(std::vector<std::string>& vecQueryElement)
+    virtual void assginParameter(const std::vector<std::string>& vecQueryElement)
     {
         if(vecQueryElement.size() != 3)
         {
-            std::cout << "vecQueryElement is not meet the condition!" << std::endl;
+            std::cout << "vecQueryElement does not meet the condition!" << std::endl;
             return ;
         }
 

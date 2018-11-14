@@ -9,11 +9,11 @@ class CSqlListExecuteResult:public CSqlExecuteResult
 public:
     virtual ~CSqlListExecuteResult(){}
 
-    virtual void assginParameter(std::vector<std::string>& vecQueryElement)
+    virtual void assginParameter(const std::vector<std::string>& vecQueryElement)
     {
         if(vecQueryElement.size() != 2)
         {
-            std::cout << "vecQueryElement is not meet the condition!" << std::endl;
+            std::cout << "vecQueryElement does not meet the condition!" << std::endl;
             return ;
         }
 
@@ -53,8 +53,48 @@ private:
     {
         return std::string("select info_seq, start_time, end_time, issue_content, complete_flag, serial_num_of_the_day, state from noteinfo where start_time like \'" + m_dateStr + "%%\'");
     }
+
+    void getQueryReuslt(std::string &result)
+    {
+        m_res = mysql_store_result(m_mysql);
+		if(m_res == NULL)
+		{
+            std::cout << "mysql_store_result failed" << std::endl;
+			return ;
+		}
+
+		m_row = mysql_fetch_row(m_res);
+		int fieldcount = mysql_num_fields(m_res);
+		int rows = mysql_num_rows(m_res);
+		char buf[32];
+        std::string queryResultBuf;
+		int i, j;
+
+		for(j = 0; j < rows; ++j)
+		{
+			for(i = 0; i < fieldcount; ++i)
+			{
+				//memset(buf, 0, sizeof(buf));
+				if (m_row[i] != NULL && (strlen(m_row[i]) > 0))
+				{
+					//snprintf(buf, sizeof(buf), "%s", row[i]);
+                    queryResultBuf = m_row[i];
+					result += queryResultBuf + " ";
+					std::cout << queryResultBuf << " ";
+				}
+			}
+            result += "\n";
+			std::cout << std::endl;
+			m_row = mysql_fetch_row(m_res);
+		}
+		std::cout << "result: " << std::endl;
+        std::cout << result;
+    }
+
 private:
     std::string m_dateStr;
+    MYSQL_RES* m_res;
+	MYSQL_ROW m_row;
 };
 
 
