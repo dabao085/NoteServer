@@ -10,14 +10,14 @@ public:
 
     virtual void assginParameter(const std::vector<std::string>& vecQueryElement)
     {
-        if(vecQueryElement.size() != 3)
+        if(vecQueryElement.size() != 2)
         {
             std::cout << "vecQueryElement does not meet the condition!" << std::endl;
             return ;
         }
 
-        m_dateStr = vecQueryElement[1].substr(0, 10);
-        m_info_seq = vecQueryElement[2];
+        //m_dateStr = vecQueryElement[1].substr(0, 10);
+        m_info_seq = vecQueryElement[1];
     }
 
     virtual int executeAndGetResult(std::string &result)
@@ -29,7 +29,7 @@ public:
         }
 
         int ret = mysql_query(m_mysql, getSqlStatment().c_str());
-        if(ret = 1)//success
+        if(ret == 0)//success
         {
             result = "mysql done operation success\n";
             std::cout << result << std::endl;
@@ -50,12 +50,12 @@ private:
 
     virtual std::string getSqlStatment() const
     {
-        return std::string("update noteinfo set complete_flag = 1 where start_time like \'" + m_dateStr + "%%\' and info_seq = " + m_info_seq);
+        return std::string("update noteinfo set complete_flag = 1 where info_seq = " + m_info_seq);
     }
 
 private:
     std::string m_dateStr;
-    std::string m_info_seq;    
+    std::string m_info_seq;
 };
 
 #endif

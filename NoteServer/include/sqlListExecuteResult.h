@@ -30,17 +30,22 @@ public:
 
         std::cout << "getSqlStatment: " << getSqlStatment().c_str() << std::endl;
         int ret = mysql_query(m_mysql, getSqlStatment().c_str());
+        if(ret != 0)
+        {
+            std::cerr << "msyql_query failed!" << std::endl;
+            return -1;
+        }
         getQueryReuslt(result);
         
-        if(ret = 1)//success
-        {
-            std::cout << result << std::endl;
-        }
-        else
-        {
-            std::cout << result << std::endl;
-            return -1;
-        }          
+        // if(ret = 1)//success
+        // {
+        //     std::cout << result << std::endl;
+        // }
+        // else
+        // {
+        //     std::cout << result << std::endl;
+        //     return -1;
+        // }   
     }
 
 private:

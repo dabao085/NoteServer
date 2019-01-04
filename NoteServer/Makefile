@@ -1,4 +1,4 @@
-CFLAG = -Iinclude
+CFLAG = -Iinclude -g
 LDLIBS = -L/usr/lib64/mysql -lmysqlclient
 TARGET = server/noteServer client/noteClient
 

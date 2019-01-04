@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
 	listenfd = Socket(AF_INET, SOCK_STREAM, 0);
 
 	bzero(&servaddr,sizeof(servaddr));
-	servaddr.sin_family = AF_INET;
+	servaddr.sin_family = AF_INET;	//IPV4 protocal
 	servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
 	servaddr.sin_port = htons(6610);
 
@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
 
 	epollfd = epoll_create(1);
 	ev.data.fd = listenfd;
-	ev.events = EPOLLIN|EPOLLET;
+	ev.events = EPOLLIN|EPOLLET;//focus on "Input"
 	epoll_ctl(epollfd, EPOLL_CTL_ADD, listenfd, &ev);
 
 	Bind(listenfd, (struct sockaddr*)&servaddr, sizeof(servaddr));
@@ -70,9 +70,10 @@ int main(int argc, char *argv[])
 
 	for(;;)//event loop
 	{
-		nfds = epoll_wait(epollfd, events, 20, -1);
+		nfds = epoll_wait(epollfd, events, 20, -1);//maxevents: 20
 		for(int i = 0; i < nfds; ++i)
 		{
+			//listenning for new connection
 			if(events[i].data.fd == listenfd)
 			{
 				len = sizeof(cliaddr);
@@ -83,27 +84,27 @@ int main(int argc, char *argv[])
 				ev.events = EPOLLIN|EPOLLET;
 				if(epoll_ctl(epollfd, EPOLL_CTL_ADD, connfd, &ev) < 0)
 				{
-					//printf(stderr, "epoll set insertion error: fd = %d\n", connfd);
 					cerr << "epoll set insertion error: fd = " << connfd << endl;
 					return -1;
 				}
 			}
 			else
 			{
-				int n;
 				int sockfd = events[i].data.fd;
+				//READ operation is ready!
 				if(events[i].events & EPOLLIN){		
-					n = read(sockfd, recvBuf, 1024);
+					int n = read(sockfd, recvBuf, 1024);
 					if(n == 0)
 					{
 						cout << "disconnect from client" << endl;
+						epoll_ctl(epollfd, EPOLL_CTL_DEL, sockfd, NULL);	//delete socket which is disconnected.
 						continue;
 					}
 
 					recvBuf[n] = '\0';
 					cout << "EPOLLIN: recv msg is: " << recvBuf << endl;
 
-					string strRecvBuf(recvBuf);
+					//string strRecvBuf(recvBuf);
 					if(getResultFromMysql(recvBuf, response) < 0)
 					{
 						cerr << "getResultFromMysql error!" << endl;
@@ -113,6 +114,7 @@ int main(int argc, char *argv[])
 					if(response.empty()){
 						response = "记录为空";
 					}
+					//sockfd: READ->WRITE into eventset.
 					ev.data.fd = sockfd;
 					ev.events = EPOLLOUT|EPOLLET;
 					epoll_ctl(epollfd, EPOLL_CTL_MOD, sockfd, &ev);
@@ -168,8 +170,8 @@ int getResultFromMysql(const string &request, string &response)
 	}
 
 	//string result;
-	//CSqlExecuteResult* pSqlExecute = CSqlExecuteResultFactory::create(vectQueryElement[0]);
-	shared_ptr<CSqlExecuteResult> pSqlExecute(CSqlExecuteResultFactory::create(vectQueryElement[0]));
+	CSqlExecuteResult* pSqlExecute = CSqlExecuteResultFactory::create(vectQueryElement[0]);
+	//shared_ptr<CSqlExecuteResult> pSqlExecute(CSqlExecuteResultFactory::create(vectQueryElement[0]));
 
 	pSqlExecute->assginParameter(vectQueryElement);
 	if(pSqlExecute->executeAndGetResult(response) < 0)

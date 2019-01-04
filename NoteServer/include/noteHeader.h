@@ -16,6 +16,7 @@
 #include <assert.h>
 #include <sys/wait.h>
 #include <sys/epoll.h>
+#include <memory>
 #include "noteMysql.h"
 
 #define LISTENQ 10
